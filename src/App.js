@@ -74,6 +74,7 @@ function App() {
     setLoading(true);
     try {
       await getFlipContract().methods.approve(MIGRATOR_ADDRESS, MaxUint256).send({ from: account, gas: 150000, gasPrice: 30000000000 });
+      setApproved(true);
     } catch(e) {}
     setLoading(false);
   }
