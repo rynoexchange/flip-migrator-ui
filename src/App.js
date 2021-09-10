@@ -7,12 +7,11 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import ERC20Abi from './abi/erc20.json';
 import MigratorAbi from './abi/migrator.json';
 import { MaxUint256 } from '@ethersproject/constants';
-import { Octagon, RefreshCw } from 'react-feather';
+import { Check, Info, Octagon, RefreshCw } from 'react-feather';
 
 const FLIP_ADDRESS = '0xb6505dEfE58759C09e0dF0739f8F5A6f32bffd44';
 const RYNO_ADDRESS = '0xC59615DA2DA226613B1C78F0c6676CAC497910bC';
-const MIGRATOR_ADDRESS = '0x759aF327C89BFCdc6f0DeBd08cb9b538C5107AD0';
-
+const MIGRATOR_ADDRESS = '0x7B0C8a4df1eE89C9B6d7089F1a9517aB33E3E0aa';
 
 const web3Modal = new Web3Modal({
   network: "poa-core",
@@ -130,14 +129,17 @@ function App() {
   return (
     <div className="bg-gray-900 text-white min-h-screen">
       <div className="container mx-auto px-4 py-16 text-center">
-        <div className="max-w-xs mx-auto">
+        <div className="max-w-sm mx-auto">
+          <p>
+            <img src="/favicon.png" className="mx-auto h-20 mb-12" />
+          </p>
           <h1 className="text-2xl font-bold mb-2 font-mono">FLIP → RYNO Migrator</h1>
           <p>
-            Fliple is now re-branded and the new name, <u>Ryno</u>. 
+            New name, new token, new branding! <br />Fliple is now <u className="font-bold">Ryno</u>.
             You can convert your old FLIP tokens to new RYNO tokens using this app.
           </p>
 
-          <hr className="my-6" />
+          <hr className="my-12" />
 
           {flipBalance !== null && rynoBalance !== null && (
             <div className="bg-gray-800 rounded p-4 mb-6">
@@ -159,11 +161,21 @@ function App() {
               approved ? (
                 <a onClick={handleMigrate} className={buttonClass}>Convert FLIP to RYNO</a>
               ) : (
-                <a onClick={handleApprove} className={buttonClass}>Approve FLIP</a>    
+                <a onClick={handleApprove} className={buttonClass}>Approve FLIP</a>
               )
             ) : (
               <a onClick={handleConnect} className={buttonClass}>Connect wallet</a>
             )
+          )}
+
+          {rynoBalance && (
+            <div className="bg-gray-300 mt-12 p-4 rounded-sm shadow-xl text-black">
+              <Check className="w-14 h-14 text-green-600 mx-auto mb-3" />
+              <p className="text-lg font-bold mb-2 uppercase font-mono">Add RYNO to your favorite wallet</p>
+              <p className="font-semibold mb-2">- Contract Address -</p>
+              <a className="text-sm font-mono font-bold border-b border-dashed border-red-300 text-red-600 mb-2 block">{RYNO_ADDRESS}</a>
+              <p><span className="font-normal text-sm text-gray-600">(Decimals: 18)</span></p>
+            </div>
           )}
         </div>
       </div>
