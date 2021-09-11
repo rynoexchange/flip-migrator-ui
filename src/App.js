@@ -8,6 +8,7 @@ import ERC20Abi from './abi/erc20.json';
 import MigratorAbi from './abi/migrator.json';
 import { MaxUint256 } from '@ethersproject/constants';
 import { Check, Info, Octagon, RefreshCw } from 'react-feather';
+import { sleep } from 'wait-promise';
 
 const FLIP_ADDRESS = '0xb6505dEfE58759C09e0dF0739f8F5A6f32bffd44';
 const RYNO_ADDRESS = '0xC59615DA2DA226613B1C78F0c6676CAC497910bC';
@@ -52,13 +53,10 @@ function App() {
   }
 
   async function handleConnect() {
+    // fixes walletconnect connection issue on mobile
+    localStorage.removeItem('walletconnect');
+
     const provider = await web3Modal.connect();
-
-    if (!provider.connected) {
-      handleConnect();
-      return;
-    }
-
     const web3 = new Web3(provider);
 
     setWeb3(web3);
@@ -67,18 +65,39 @@ function App() {
     provider.on("accountsChanged", (accounts) => {
       setAccount(accounts[0]);
       setFlipBalance(null);
+      setRynoBalance(null);
     });
 
     provider.on("disconnect", () => {
       setAccount(null);
       setFlipBalance(null);
+      setRynoBalance(null);
+    });
+  }
+
+  async function waitTransaction(callPromise) {
+    return new Promise((resolve, reject) => {
+      callPromise.on('transactionHash', async (tx) => {
+        let receipt = null
+        while (receipt == null) {
+            receipt = await web3.eth.getTransactionReceipt(tx);
+            await sleep(2500);
+        }
+        resolve();
+      });
+
+      callPromise.then(resolve);
+      callPromise.catch(reject);
     });
   }
 
   async function handleApprove() {
     setLoading(true);
     try {
-      await getFlipContract().methods.approve(MIGRATOR_ADDRESS, MaxUint256).send({ from: account, gas: 150000, gasPrice: 30000000000 });
+      await waitTransaction(
+        getFlipContract().methods.approve(MIGRATOR_ADDRESS, MaxUint256)
+          .send({ from: account, gas: 150000, gasPrice: 30000000000 })
+      );
       setApproved(true);
     } catch(e) {}
     setLoading(false);
@@ -87,8 +106,10 @@ function App() {
   async function handleMigrate() {
     setLoading(true);
     try {
-      const migrator = getMigratorContract();
-      await migrator.methods.migrate(flipBalance).send({ from: account, gas: 150000, gasPrice: 30000000000 });
+      await waitTransaction(
+        getMigratorContract().methods.migrate(flipBalance)
+          .send({ from: account, gas: 150000, gasPrice: 30000000000 })
+      );
       await fetchBalances();
     } catch(e) {}
     setLoading(false);
@@ -176,10 +197,12 @@ function App() {
 
           {rynoBalance && (
             <div className="bg-gray-300 mt-12 p-4 rounded-sm shadow-xl text-black">
-              <Check className="w-14 h-14 text-green-600 mx-auto mb-3" />
-              <p className="text-lg font-bold mb-2 uppercase font-mono">Add RYNO to your favorite wallet</p>
+              <Check className="w-12 h-12 text-green-600 mx-auto mb-1" />
+              <p className="text-lg font-bold mb-2 uppercase font-mono">Add RYNO to your wallet</p>
               <p className="font-semibold mb-2">- Contract Address -</p>
-              <a className="text-sm font-mono font-bold border-b border-dashed border-red-300 text-red-600 mb-2 block">{RYNO_ADDRESS}</a>
+              <a className="text font-mono font-bold border border-dashed border-red-300 text-red-600 mb-2 block break-words p-3">
+                {RYNO_ADDRESS}
+              </a>
               <p><span className="font-normal text-sm text-gray-600">(Decimals: 18)</span></p>
             </div>
           )}
