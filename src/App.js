@@ -14,7 +14,7 @@ const RYNO_ADDRESS = '0xC59615DA2DA226613B1C78F0c6676CAC497910bC';
 const MIGRATOR_ADDRESS = '0x7B0C8a4df1eE89C9B6d7089F1a9517aB33E3E0aa';
 
 const web3Modal = new Web3Modal({
-  network: "poa-core",
+  network: 'poa-core',
   providerOptions: {
     walletconnect: {
       package: WalletConnectProvider,
@@ -53,6 +53,12 @@ function App() {
 
   async function handleConnect() {
     const provider = await web3Modal.connect();
+
+    if (!provider.connected) {
+      handleConnect();
+      return;
+    }
+
     const web3 = new Web3(provider);
 
     setWeb3(web3);
@@ -63,7 +69,7 @@ function App() {
       setFlipBalance(null);
     });
 
-    provider.on("disconnect", (accounts) => {
+    provider.on("disconnect", () => {
       setAccount(null);
       setFlipBalance(null);
     });
