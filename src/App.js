@@ -3,7 +3,7 @@ import './App.css';
 import { useEffect, useState } from 'react';
 import Web3 from 'web3';
 import Web3Modal from 'web3modal';
-import WalletConnectProvider from "@walletconnect/web3-provider";
+import WalletConnectProvider from "@walletconnect/ethereum-provider";
 import ERC20Abi from './abi/erc20.json';
 import MigratorAbi from './abi/migrator.json';
 import { MaxUint256 } from '@ethersproject/constants';
